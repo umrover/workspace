@@ -115,12 +115,6 @@ public:
   cv::Mat depth();
   #endif
 
-  /*#if OBSTACLE_DETECTION
-  void dataCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr &p_pcl_point_cloud);
-  void pcl_write(const cv::String &filename, pcl::PointCloud<pcl::PointXYZRGB>::Ptr &p_pcl_point_cloud);
-
-  #endif*/
-
   void disk_record_init();
   void write_curr_frame_to_disk(cv::Mat rgb, cv::Mat depth, int counter);
 
@@ -160,15 +154,6 @@ Camera::Impl::Impl() {
     cerr<<"No rgb or depth dir"<<endl;
     return;
   }
-
-  /*#if OBSTACLE_DETECTION
-  pcd_path = path + "/pcl";
-  pcd_dir = opendir(pcd_path.c_str() );
-  if (NULL==pcd_dir) {
-    std::cerr<<"Input folder not exist\n";    
-    return;
-  }
-  #endif */
   
 
   // get the vector of image names, jpg/png for rgb files, .exr for depth files
@@ -196,53 +181,18 @@ Camera::Impl::Impl() {
 
 #endif
 
-/*#if OBSTACLE_DETECTION
- dp = NULL;
-
- std::cout<<"Read PCL image names\n";
-  
-  do{
-    
-    if ((dp = readdir(pcd_dir)) != NULL) {
-      
-      std::string file_name(dp->d_name);
-      std::cout<<"file_name is "<<file_name<<std::endl;
-      
-      // the lengh of the tail str is at least 4
-      if (file_name.size() < 5) continue;
-
-      pcd_names.push_back(file_name);
-      
-    }
-
- } while (dp != NULL);
-
-  std::sort(pcd_names.begin(), pcd_names.end());
-  std::cout<<"Read .pcd image names complete\n";
-  idx_curr_pcd_img = 0;
-
-#endif */
 } 
 
 bool Camera::Impl::grab() {
 
   bool end = true;
 
-  //#if AR_DETECTION
   idx_curr_img++;
   if (idx_curr_img >= img_names.size()) {
     std::cout<<"Ran out of images\n";
     end = false;
   }
-  //#endif
 
-  /*#if OBSTACLE_DETECTION
-  idx_curr_pcd_img++;
-  if (idx_curr_pcd_img >= pcd_names.size()-2) {
-    std::cout<<"Ran out of images\n";
-    end = false;  
-  }
-  #endif*/
   if(!end){
     exit(1);
   }
@@ -310,20 +260,7 @@ void Camera::record_ar_finish() {
 #endif
 
 
-//Reads the point data cloud p_pcl_point_cloud
-/*#if OBSTACLE_DETECTION
-void Camera::Impl::dataCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr &p_pcl_point_cloud){
- 
- //Read in image names
- std::string pcd_name = pcd_names[idx_curr_pcd_img];
- std::cout << "PCD Name: " << pcd_name << std::endl;
- std::string full_path = pcd_path + std::string("/") + pcd_name;
-  //Load in the file  
-  if (pcl::io::loadPCDFile<pcl::PointXYZRGB> (full_path, *p_pcl_point_cloud) == -1){ //* load the file 
-    PCL_ERROR ("Couldn't read file test_pcd.pcd \n"); 
-  }
-}
-#endif*/
+
 
 #endif
 
@@ -347,52 +284,3 @@ cv::Mat Camera::depth() {
 	return this->impl_->depth();
 }
 #endif
-
-/*#if OBSTACLE_DETECTION
-void Camera::getDataCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr &p_pcl_point_cloud) {
-  this->impl_->dataCloud(p_pcl_point_cloud);
-}
-#endif*/
-
-/*#if WRITE_CURR_FRAME_TO_DISK && AR_DETECTION 
-
-
-// creates and opens folder to write to 
-void Camera::disk_record_init() {
-    //defining directories to write to
-    rgb_foldername = DEFAULT_ONLINE_DATA_FOLDER "rgb/";
-    depth_foldername = DEFAULT_ONLINE_DATA_FOLDER "depth/";
-    string mkdir_rgb =  std::string("mkdir -p ") + rgb_foldername;
-    string mkdir_depth =  std::string("mkdir -p ") + depth_foldername;
-    //pcl_foldername = DEFAULT_ONLINE_DATA_FOLDER "pcl/";
-    //string mkdir_pcl = std::string("mkdir -p ") + pcl_foldername;
-
-    //creates new folder in the system
-    if ( -1 == system( mkdir_rgb.c_str()) || -1 == system(mkdir_depth.c_str())) 
-    {
-      exit(1);
-    }
-}
-#endif */
-/*
-//writes the Mat to a file
-
-//Writes point cloud data to data folder specified in build tag 
-void pcl_write(const cv::String &filename, pcl::PointCloud<pcl::PointXYZRGB>::Ptr &p_pcl_point_cloud){
-  std::cout << "name of path is: " << filename << endl;
-  try{ pcl::io::savePCDFileASCII (filename, *p_pcl_point_cloud); }
-  catch (pcl::IOException &e){cerr << e.what();}
-}
-
-void Camera::write_curr_frame_to_disk(cv::Mat rgb, cv::Mat depth, pcl::PointCloud<pcl::PointXYZRGB>::Ptr &p_pcl_point_cloud, int counter){
-    string fileName = to_string(counter / FRAME_WRITE_INTERVAL);
-    while(fileName.length() < 4){
-      fileName = '0'+fileName;
-    }
-
-    pcl_write(pcl_foldername + fileName + std::string(".pcd"), p_pcl_point_cloud);
-    cv::imwrite(rgb_foldername +  fileName + std::string(".jpg"), rgb );
-    cv::imwrite(depth_foldername +  fileName + std::string(".exr"), depth );
-}
-
-#endif */

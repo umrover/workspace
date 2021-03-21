@@ -2,19 +2,14 @@
 #include <lcm/lcm-cpp.hpp>
 #include "rover_msgs/TargetPosition.hpp"
 #include "rover_msgs/TargetPositionList.hpp"
-//#include "rover_msgs/TargetList.hpp"
-//#include "rover_msgs/TargetOrientation.hpp"
 #include <unistd.h>
 #include "perception.hpp"
 
 using namespace std;
 
 int main() {
-    cout<<"Hello world"<<endl;
-
   /* --- Camera Initializations --- */
   Camera cam;
-  int iterations = 0;
   cam.grab();
 
   #if PERCEPTION_DEBUG
@@ -25,10 +20,6 @@ int main() {
   Mat rgb;
   Mat src = cam.image();
   #endif
-
-  /*#if WRITE_CURR_FRAME_TO_DISK && AR_DETECTION && OBSTACLE_DETECTION
-    cam.disk_record_init();
-  #endif */
 
   /* -- LCM Messages Initializations -- */
   lcm::LCM lcm_;
@@ -64,26 +55,17 @@ int main() {
     Mat depth_img = cam.depth();
     #endif
 
-   /* #if WRITE_CURR_FRAME_TO_DISK && AR_DETECTION && OBSTACLE_DETECTION
-      if (iterations % FRAME_WRITE_INTERVAL == 0) {
-        Mat rgb_copy = src.clone(), depth_copy = depth_img.clone();
-        cerr << "Copied correctly" << endl;
-        cam.write_curr_frame_to_disk(rgb_copy, depth_copy, pointcloud.pt_cloud_ptr, iterations);
-      }
-    #endif*/
-
 /* --- AR Tag Processing --- */
     arTags[0].z = -1;
     arTags[1].z = -1;
     #if AR_DETECTION
-    cerr<<"Finding AR Tags"<<endl;
+      cerr<<"Finding AR Tags"<<endl;
       tagPair = detector.findARTags(src, depth_img, rgb);
       #if AR_RECORD
         cam.record_ar(rgb);
       #endif
 
       detector.updateDetectedTagInfo(arTags, tagPair, depth_img, src, rgb);
-      //cerr<<arTags[0].x<<" "<<arTags[0].y<<" "<<arTags[0].z<<" "<<arTags[0].target_id<<endl;
 
     #if PERCEPTION_DEBUG && AR_DETECTION
       imshow("depth", src);
@@ -94,9 +76,19 @@ int main() {
 
 /* --- Publish LCMs --- */
   lcm_.publish("/target_position_list", &arTagsMessage);
+  #if PERCEPTION_DEBUG
+  cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Tag 1 Location Sent: " << arTags[0].x << " " << arTags[0].y << " " << arTags[0].z <<"\n";
+  cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Tag 1 ID Sent: " << arTags[0].target_id << "\n";
+    
+   //print out second tag if found
+   //if(arTags[1].target_id != -1) {
+        cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Tag 2 Location Sent: " << arTags[1].x << " " << arTags[1].y << " " << arTags[1].z  <<"\n";
+        cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Tag 2 ID Sent: " << arTags[1].target_id << "\n";
+   // } 
+   #endif
 
     #if !ZED_SDK_PRESENT
-    std::this_thread::sleep_for(0.2s); // Iteration speed control not needed when using camera 
+    std::this_thread::sleep_for(1s); // Iteration speed control not needed when using camera 
     #endif
     cerr<<"LCM sent"<<endl;
   }

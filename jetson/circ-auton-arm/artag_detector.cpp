@@ -54,19 +54,21 @@ Point2f TagDetector::getAverageTagCoordinateFromCorners(const vector<Point2f> &c
     return avgCoord;
 }
 
-//TODO: add two members to Tag struct for original tag location and location in coordinates (m) to use in updateTag function
 Point2f TagDetector::getTagCoordRelativeToCenter(const vector<Point2f> &corners, Mat &src, Mat &rgb, Point2f &tagLoc) {
     //RETURN:
     //Point3f containing coordinates of tag from center of image in meters
     Point2f centerCoord;
     double heightImage = src.size().height;
     double widthImage = src.size().width;
+
+    //get center coordinate based on dimensions of image
     centerCoord.x = widthImage / 2;
     centerCoord.y = heightImage / 2;
     
     Point2f tagCoord;
     tagCoord.x = abs(centerCoord.x - tagLoc.x);
     tagCoord.y = abs(centerCoord.y - tagLoc.y);
+
     //if tag x coordinate is less than center x, tag x should be negative
     //if tag y coord is greater than center y, tag y should be negative
     if(tagLoc.x < centerCoord.x || tagLoc.y > centerCoord.y) {
@@ -106,11 +108,10 @@ Point2f TagDetector::getTagCoordRelativeToCenter(const vector<Point2f> &corners,
     //convert to ft for testing
     tagCoord.x = tagCoord.x * 100 / 2.54 / 12;
     tagCoord.y *= 100 / 2.54 / 12;
-
-    //cerr << "tag x and center x " << tagLoc.x << " " << centerCoord.x << " " << tagLoc.x - centerCoord.x << endl;
-    //cerr << "tag y and center y " << tagLoc.y << " " << centerCoord.y << " " << tagLoc.y - centerCoord.y << endl;
-    cerr << "tag x coord :" << tagCoord.x << endl; 
-    cerr << "tag y coord :" << tagCoord.y << endl; 
+    
+    //print coordinates for debugging
+    //cerr << "tag x coord :" << tagCoord.x << endl; 
+    //cerr << "tag y coord :" << tagCoord.y << endl; 
     return tagCoord;
 }
 
@@ -139,18 +140,17 @@ pair<Tag, Tag> TagDetector::findARTags(Mat &src, Mat &depth_src, Mat &rgb) {  //
         discoveredTags.second.locM = Point2f();
 
     } else if (ids.size() == 1) {  // exactly one tag found
+    cerr << "one tag found " << endl;
         discoveredTags.first.id = ids[0];
         discoveredTags.first.loc = getAverageTagCoordinateFromCorners(corners[0]);
         discoveredTags.first.locM = getTagCoordRelativeToCenter(corners[0], src, rgb, discoveredTags.first.loc);
-        
-        //cerr << "tag coordinates " << ids[0] << " " << getTagCoordRelativeToCenter(corners[0],src,rgb,discoveredTags.first.loc).x 
-        //<< " " << getTagCoordRelativeToCenter(corners[0],src,rgb,discoveredTags.first.loc).y <<endl;
-
         // set second tag to invalid object with tag as -1
         discoveredTags.second.id = -1;
         discoveredTags.second.loc = Point2f();
         discoveredTags.second.locM = Point2f();
+
     } else if (ids.size() == 2) {  // exactly two tags found
+    cerr << "two tags found" << endl;
         Tag t0, t1;
         t0.id = ids[0];
         t0.loc = getAverageTagCoordinateFromCorners(corners[0]);
@@ -166,6 +166,7 @@ pair<Tag, Tag> TagDetector::findARTags(Mat &src, Mat &depth_src, Mat &rgb) {  //
             discoveredTags.first = t1;
             discoveredTags.second = t0;
         }
+
     } else {  // detected >=3 tags
         // return leftmost and rightsmost detected tags to account for potentially seeing 2 of each tag on a post
         Tag t0, t1;
@@ -232,14 +233,17 @@ void TagDetector::updateDetectedTagInfo(rover_msgs::TargetPosition *arTags, pair
     tags.buffer.push_back(0);
     tags.buffer.push_back(0);
 
+
+    cerr<< "tag second id" << tagPair.second.id << endl;
+
   for (uint i=0; i<2; i++){
     if(tags.id[i] == -1){//no tag found
-        if(tags.buffer[i] <= 20){//send buffered tag until tag is found
+        while(tags.buffer[i] <= 20){//send buffered tag until tag is found
             ++tags.buffer[i];
-        } else {//if still no tag found, set all stats to -1
+        } if(tags.buffer[i] > 20) {//if still no tag found, set all stats to -1
             arTags[i].z = -1;
-            //arTags[i].bearing = -1;
             arTags[i].target_id = -1;
+            cerr << "set to -1" << endl;
         }
     } 
     else {//one tag found
@@ -247,21 +251,10 @@ void TagDetector::updateDetectedTagInfo(rover_msgs::TargetPosition *arTags, pair
             arTags[i].x = tags.locxM.at(i);
             arTags[i].y = tags.locyM.at(i);
             arTags[i].z = depth_img.at<float>(tags.locy.at(i), tags.locx.at(i)) / MM_PER_M;
-            //arTags[i].bearing = getAngle((int)tags.locx.at(i), src.cols);
             arTags[i].target_id = tags.id.at(i);
             tags.buffer[i] = 0;
         } 
     }
   }
-    cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Location Sent: " << arTags[0].x << " " << arTags[0].y << " " << arTags[0].z <<"\n";
-    cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!ID Sent: " << arTags[0].target_id << "\n";
-    
-    //print out second tag if found
-    if(tags.id[1] != -1) {
-        cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Location Sent: " << arTags[1].x << " " << arTags[1].y << " " << arTags[0].z  <<"\n";
-        cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!ID Sent: " << arTags[1].target_id << "\n";
-    }
 
 }
-
-
