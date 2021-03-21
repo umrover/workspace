@@ -27,6 +27,9 @@ int main() {
   rover_msgs::TargetPosition* arTags = arTagsMessage.target_list;
   arTags[0].z = -1;
   arTags[1].z = -1;
+  vector<int> buffer;
+  buffer.push_back(0);
+  buffer.push_back(0);
 
   /* --- AR Tag Initializations --- */
   TagDetector detector;
@@ -65,7 +68,7 @@ int main() {
         cam.record_ar(rgb);
       #endif
 
-      detector.updateDetectedTagInfo(arTags, tagPair, depth_img, src, rgb);
+      detector.updateDetectedTagInfo(arTags, tagPair, depth_img, src, rgb, buffer);
 
     #if PERCEPTION_DEBUG && AR_DETECTION
       imshow("depth", src);

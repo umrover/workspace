@@ -209,14 +209,13 @@ double TagDetector::getAngle(float xPixel, float wPixel){
 }
 
 
-void TagDetector::updateDetectedTagInfo(rover_msgs::TargetPosition *arTags, pair<Tag, Tag> &tagPair, Mat &depth_img, Mat &src, Mat &rgb){
+void TagDetector::updateDetectedTagInfo(rover_msgs::TargetPosition *arTags, pair<Tag, Tag> &tagPair, Mat &depth_img, Mat &src, Mat &rgb, vector<int> &buffer){
     struct tagPairs {
         vector<int> id;
         vector<double> locx;
         vector<double> locy;
         vector<double> locxM;
         vector<double> locyM;
-        vector<int> buffer;
     }; 
     tagPairs tags;
 
@@ -230,20 +229,15 @@ void TagDetector::updateDetectedTagInfo(rover_msgs::TargetPosition *arTags, pair
     tags.locyM.push_back(tagPair.first.locM.y);
     tags.locxM.push_back(tagPair.second.locM.x);
     tags.locyM.push_back(tagPair.second.locM.y);
-    tags.buffer.push_back(0);
-    tags.buffer.push_back(0);
-
-
-    cerr<< "tag second id" << tagPair.second.id << endl;
 
   for (uint i=0; i<2; i++){
     if(tags.id[i] == -1){//no tag found
-        while(tags.buffer[i] <= 20){//send buffered tag until tag is found
-            ++tags.buffer[i];
-        } if(tags.buffer[i] > 20) {//if still no tag found, set all stats to -1
+        if(buffer[i] <= 20){//send buffered tag until tag is found
+            ++buffer[i];
+        } else {//if still no tag found, set all stats to -1
             arTags[i].z = -1;
             arTags[i].target_id = -1;
-            cerr << "set to -1" << endl;
+            cerr << arTags[i].target_id  << endl;
         }
     } 
     else {//one tag found
@@ -252,7 +246,7 @@ void TagDetector::updateDetectedTagInfo(rover_msgs::TargetPosition *arTags, pair
             arTags[i].y = tags.locyM.at(i);
             arTags[i].z = depth_img.at<float>(tags.locy.at(i), tags.locx.at(i)) / MM_PER_M;
             arTags[i].target_id = tags.id.at(i);
-            tags.buffer[i] = 0;
+            buffer[i] = 0;
         } 
     }
   }
