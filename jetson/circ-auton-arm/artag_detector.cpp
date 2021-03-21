@@ -140,7 +140,6 @@ pair<Tag, Tag> TagDetector::findARTags(Mat &src, Mat &depth_src, Mat &rgb) {  //
         discoveredTags.second.locM = Point2f();
 
     } else if (ids.size() == 1) {  // exactly one tag found
-    cerr << "one tag found " << endl;
         discoveredTags.first.id = ids[0];
         discoveredTags.first.loc = getAverageTagCoordinateFromCorners(corners[0]);
         discoveredTags.first.locM = getTagCoordRelativeToCenter(corners[0], src, rgb, discoveredTags.first.loc);
@@ -150,7 +149,6 @@ pair<Tag, Tag> TagDetector::findARTags(Mat &src, Mat &depth_src, Mat &rgb) {  //
         discoveredTags.second.locM = Point2f();
 
     } else if (ids.size() == 2) {  // exactly two tags found
-    cerr << "two tags found" << endl;
         Tag t0, t1;
         t0.id = ids[0];
         t0.loc = getAverageTagCoordinateFromCorners(corners[0]);
@@ -237,7 +235,6 @@ void TagDetector::updateDetectedTagInfo(rover_msgs::TargetPosition *arTags, pair
         } else {//if still no tag found, set all stats to -1
             arTags[i].z = -1;
             arTags[i].target_id = -1;
-            cerr << arTags[i].target_id  << endl;
         }
     } 
     else {//one tag found
