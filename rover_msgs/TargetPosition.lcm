@@ -4,5 +4,5 @@ struct TargetPosition {
     double x;
     double y;
     double z;
-    int32_t target_id;
+    int8_t target_id;
 }

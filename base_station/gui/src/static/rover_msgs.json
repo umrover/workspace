@@ -686,6 +686,20 @@
             "enable_sa"
         ]
     ],
+    "Target":[
+        [
+            "double",
+            "distance"
+        ],
+        [
+            "double",
+            "bearing"
+        ],
+        [
+            "int32_t",
+            "id"
+        ]
+    ],
     "TargetAngles": [
         [
             "float",
@@ -712,6 +726,12 @@
             "f"
         ]
     ],
+    "TargetList": [
+        [
+            "Target",
+            "targetList[2]"
+        ]
+    ],
     "TargetPoint": [
         [
             "float",
@@ -724,6 +744,34 @@
         [
             "float",
             "z"
+        ]
+    ],
+    "TargetPosition": [
+        [
+            "double",
+            "x"
+        ],
+        [
+            "double",
+            "y"
+        ],
+        [
+            "double",
+            "z"
+        ],
+        [
+            "int8_t",
+            "target_id"
+        ]
+    ],
+    "TargetPositionList": [
+        [
+            "int8_t",
+            "num_targets"
+        ],
+        [
+            "TargetPosition",
+            "target_list[3]"
         ]
     ],
     "Temperature": [
@@ -899,6 +947,7 @@
         "PIDConstants",
         "PiPicture",
         "PiSettings",
+        "Pos",
         "ProximitySensors",
         "RepeaterDrop",
         "RGB",
@@ -914,8 +963,12 @@
         "SimulationMode",
         "StartTest",
         "TalonConfig",
+        "Target",
         "TargetAngles",
+        "TargetList",
         "TargetPoint",
+        "TargetPosition",
+        "TargetPositionList",
         "Temperature",
         "TennisBall",
         "TestEnable",
