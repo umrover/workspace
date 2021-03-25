@@ -59,8 +59,13 @@ int main() {
     #endif
 
 /* --- AR Tag Processing --- */
-    arTags[0].z = -1;
-    arTags[1].z = -1;
+    //Set default values
+    for(int i = 0; i < 3; i++) {
+        arTags[i].z = -1;
+        arTags[i].target_id = -1;
+    }
+    arTagsMessage.num_targets = 0;
+
     #if AR_DETECTION
       cerr<<"Finding AR Tags"<<endl;
       tagPair = detector.findARTags(src, depth_img, rgb);
@@ -68,7 +73,14 @@ int main() {
         cam.record_ar(rgb);
       #endif
 
+
       detector.updateDetectedTagInfo(arTags, tagPair, depth_img, src, rgb, buffer);
+
+        //update num targets
+    for(int i = 0; i < 3; i++) {
+        if(arTags[i].target_id != -1) arTagsMessage.num_targets++;
+        cerr << arTags[i].target_id << endl;
+      }
 
     #if PERCEPTION_DEBUG && AR_DETECTION
       imshow("depth", src);

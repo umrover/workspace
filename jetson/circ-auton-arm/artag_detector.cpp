@@ -105,9 +105,9 @@ Point2f TagDetector::getTagCoordRelativeToCenter(const vector<Point2f> &corners,
     string tagCoordLabel = "(" + to_string(tagCoord.x) + " " + to_string(tagCoord.y) + ")";
     cv::putText(rgb, tagCoordLabel, Point(tagLoc.x, tagLoc.y+20), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
 
-    //convert to ft for testing
+    /*//convert to ft for testing
     tagCoord.x = tagCoord.x * 100 / 2.54 / 12;
-    tagCoord.y *= 100 / 2.54 / 12;
+    tagCoord.y *= 100 / 2.54 / 12;*/
     
     //print coordinates for debugging
     //cerr << "tag x coord :" << tagCoord.x << endl; 

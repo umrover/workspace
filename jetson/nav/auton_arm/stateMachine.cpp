@@ -108,7 +108,7 @@ void AutonArmStateMachine::updateRoverStatus( AutonState autonState ) {
 
 // Updates the target information of the rover's status.
 void AutonArmStateMachine::updateRoverStatus( TargetPositionList targetList ) {
-    if( mPhoebe->roverStatus().currentState() != AutonArmState::WaitingForTag ) return;
+    if( targetList.num_targets == 0 || mPhoebe->roverStatus().currentState() != AutonArmState::WaitingForTag ) return;
     cout << "Target received!" << endl;
     
     mNewRoverStatus.targetList() = targetList;
@@ -161,6 +161,7 @@ AutonArmState AutonArmStateMachine::executeEvaluateTag() {
 
     bool tagFound = false;
     for ( int i = 0; i < receivedList.num_targets; i++ ) {
+        cout << "tag " << i << " id: " << receivedList.target_list[i].target_id << endl;
         if (receivedList.target_list[i].target_id == CORRECT_TAG_ID) { 
             TargetPosition newPosition = receivedList.target_list[i];
             if( isEqual(currentPosition, newPosition) ) {   
@@ -204,9 +205,11 @@ AutonArmState AutonArmStateMachine::executeSendCoordinates() {
 
     TargetOrientation orientation;
     orientation.x = currentPosition.x;
-    orientation.y = currentPosition.y;
-    orientation.z = currentPosition.z;
+    orientation.y = currentPosition.z;
+    orientation.z = currentPosition.y;
     orientation.use_orientation = false;
+
+    cout<<orientation.x<<", "<<orientation.y<<", "<<orientation.z<<endl;
 
     mLcmObject.publish("/target_orientation", &orientation);
     cout << "Sent target position\n";

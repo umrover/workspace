@@ -52,7 +52,7 @@ private:
     static const int CORRECT_TAGS_NEEDED = 3;
 
     // ID of correct tag 
-    static const int32_t CORRECT_TAG_ID = -1; // TODO change to actual correct tag ID   
+    static const int32_t CORRECT_TAG_ID = 5; // TODO change to actual correct tag ID   
 
     // Delay time between tag evaluations 
     chrono::duration<double, milli> DELAY = chrono::milliseconds(50); // TODO modify if needed
